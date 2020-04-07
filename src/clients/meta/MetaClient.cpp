@@ -1630,6 +1630,48 @@ MetaClient::listEdgeIndexes(GraphSpaceID spaceID) {
     return future;
 }
 
+StatusOr<std::shared_ptr<const SchemaProviderIf>>
+MetaClient::getTagSchemaFromCache(GraphSpaceID spaceId, TagID tagID, SchemaVer ver) {
+    if (!ready_) {
+        return Status::Error("Not ready!");
+    }
+    folly::RWSpinLock::ReadHolder holder(localCacheLock_);
+    auto spaceIt = localCache_.find(spaceId);
+    if (spaceIt == localCache_.end()) {
+        LOG(ERROR) << "Space " << spaceId << " not found!";
+        return std::shared_ptr<const SchemaProviderIf>();
+    } else {
+        auto tagIt = spaceIt->second->tagSchemas_.find(std::make_pair(tagID, ver));
+        if (tagIt == spaceIt->second->tagSchemas_.end()) {
+            return std::shared_ptr<const SchemaProviderIf>();
+        } else {
+            return tagIt->second;
+        }
+    }
+}
+
+
+StatusOr<std::shared_ptr<const SchemaProviderIf>>
+MetaClient::getEdgeSchemaFromCache(GraphSpaceID spaceId, EdgeType edgeType, SchemaVer ver) {
+    if (!ready_) {
+        return Status::Error("Not ready!");
+    }
+    folly::RWSpinLock::ReadHolder holder(localCacheLock_);
+    auto spaceIt = localCache_.find(spaceId);
+    if (spaceIt == localCache_.end()) {
+        LOG(ERROR) << "Space " << spaceId << " not found!";
+        return std::shared_ptr<const SchemaProviderIf>();
+    } else {
+        auto edgeIt = spaceIt->second->edgeSchemas_.find(std::make_pair(edgeType, ver));
+        if (edgeIt == spaceIt->second->edgeSchemas_.end()) {
+            LOG(ERROR) << "Space " << spaceId << ", EdgeType " << edgeType << ", version "
+                       << ver << " not found!";
+            return std::shared_ptr<const SchemaProviderIf>();
+        } else {
+            return edgeIt->second;
+        }
+    }
+}
 
 folly::Future<StatusOr<bool>>
 MetaClient::rebuildEdgeIndex(GraphSpaceID spaceID,
@@ -2594,6 +2636,9 @@ StatusOr<LeaderMap> MetaClient::loadLeader() {
     LOG(INFO) << "Load leader ok";
     return leaderMap;
 }
+
+
+
 
 }  // namespace meta
 }  // namespace nebula
