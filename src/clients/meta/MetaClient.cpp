@@ -1630,7 +1630,7 @@ MetaClient::listEdgeIndexes(GraphSpaceID spaceID) {
     return future;
 }
 
-StatusOr<std::shared_ptr<const SchemaProviderIf>>
+StatusOr<std::shared_ptr<const NebulaSchemaProvider>>
 MetaClient::getTagSchemaFromCache(GraphSpaceID spaceId, TagID tagID, SchemaVer ver) {
     if (!ready_) {
         return Status::Error("Not ready!");
@@ -1639,11 +1639,11 @@ MetaClient::getTagSchemaFromCache(GraphSpaceID spaceId, TagID tagID, SchemaVer v
     auto spaceIt = localCache_.find(spaceId);
     if (spaceIt == localCache_.end()) {
         LOG(ERROR) << "Space " << spaceId << " not found!";
-        return std::shared_ptr<const SchemaProviderIf>();
+        return std::shared_ptr<const NebulaSchemaProvider>();
     } else {
         auto tagIt = spaceIt->second->tagSchemas_.find(std::make_pair(tagID, ver));
         if (tagIt == spaceIt->second->tagSchemas_.end()) {
-            return std::shared_ptr<const SchemaProviderIf>();
+            return std::shared_ptr<const NebulaSchemaProvider>();
         } else {
             return tagIt->second;
         }
@@ -1651,7 +1651,7 @@ MetaClient::getTagSchemaFromCache(GraphSpaceID spaceId, TagID tagID, SchemaVer v
 }
 
 
-StatusOr<std::shared_ptr<const SchemaProviderIf>>
+StatusOr<std::shared_ptr<const NebulaSchemaProvider>>
 MetaClient::getEdgeSchemaFromCache(GraphSpaceID spaceId, EdgeType edgeType, SchemaVer ver) {
     if (!ready_) {
         return Status::Error("Not ready!");
@@ -1660,13 +1660,13 @@ MetaClient::getEdgeSchemaFromCache(GraphSpaceID spaceId, EdgeType edgeType, Sche
     auto spaceIt = localCache_.find(spaceId);
     if (spaceIt == localCache_.end()) {
         LOG(ERROR) << "Space " << spaceId << " not found!";
-        return std::shared_ptr<const SchemaProviderIf>();
+        return std::shared_ptr<const NebulaSchemaProvider>();
     } else {
         auto edgeIt = spaceIt->second->edgeSchemas_.find(std::make_pair(edgeType, ver));
         if (edgeIt == spaceIt->second->edgeSchemas_.end()) {
             LOG(ERROR) << "Space " << spaceId << ", EdgeType " << edgeType << ", version "
                        << ver << " not found!";
-            return std::shared_ptr<const SchemaProviderIf>();
+            return std::shared_ptr<const NebulaSchemaProvider>();
         } else {
             return edgeIt->second;
         }

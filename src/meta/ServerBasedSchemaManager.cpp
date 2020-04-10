@@ -21,7 +21,7 @@ void ServerBasedSchemaManager::init(MetaClient *client) {
     metaClient_ = client;
 }
 
-std::shared_ptr<const SchemaProviderIf>
+std::shared_ptr<const NebulaSchemaProvider>
 ServerBasedSchemaManager::getTagSchema(GraphSpaceID space, TagID tag, SchemaVer ver) {
     VLOG(3) << "Get Tag Schema Space " << space << ", TagID " << tag << ", Version " << ver;
     CHECK(metaClient_);
@@ -29,7 +29,7 @@ ServerBasedSchemaManager::getTagSchema(GraphSpaceID space, TagID tag, SchemaVer 
     if (ver < 0) {
         auto ret = getLatestTagSchemaVersion(space, tag);
         if (!ret.ok()) {
-            return std::shared_ptr<const SchemaProviderIf>();
+            return std::shared_ptr<const NebulaSchemaProvider>();
         }
         ver = ret.value();
     }
@@ -38,7 +38,7 @@ ServerBasedSchemaManager::getTagSchema(GraphSpaceID space, TagID tag, SchemaVer 
         return ret.value();
     }
 
-    return std::shared_ptr<const SchemaProviderIf>();
+    return std::shared_ptr<const NebulaSchemaProvider>();
 }
 
 // Returns a negative number when the schema does not exist
@@ -48,7 +48,7 @@ StatusOr<SchemaVer> ServerBasedSchemaManager::getLatestTagSchemaVersion(GraphSpa
     return  metaClient_->getLatestTagVersionFromCache(space, tag);
 }
 
-std::shared_ptr<const SchemaProviderIf>
+std::shared_ptr<const NebulaSchemaProvider>
 ServerBasedSchemaManager::getEdgeSchema(GraphSpaceID space, EdgeType edge, SchemaVer ver) {
     VLOG(3) << "Get Edge Schema Space " << space << ", EdgeType " << edge << ", Version " << ver;
     CHECK(metaClient_);
@@ -56,7 +56,7 @@ ServerBasedSchemaManager::getEdgeSchema(GraphSpaceID space, EdgeType edge, Schem
     if (ver < 0) {
         auto ret = getLatestEdgeSchemaVersion(space, edge);
         if (!ret.ok()) {
-            return std::shared_ptr<const SchemaProviderIf>();
+            return std::shared_ptr<const NebulaSchemaProvider>();
         }
         ver = ret.value();
     }
@@ -66,7 +66,7 @@ ServerBasedSchemaManager::getEdgeSchema(GraphSpaceID space, EdgeType edge, Schem
         return ret.value();
     }
 
-    return std::shared_ptr<const SchemaProviderIf>();
+    return std::shared_ptr<const NebulaSchemaProvider>();
 }
 
 // Returns a negative number when the schema does not exist
