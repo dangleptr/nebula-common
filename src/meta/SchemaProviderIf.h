@@ -111,8 +111,7 @@ public:
     virtual const char* getFieldName(int64_t index) const = 0;
 
     virtual cpp2::PropertyType getFieldType(int64_t index) const = 0;
-    virtual cpp2::PropertyType getFieldType(const folly::StringPiece name)
-        const = 0;
+    virtual cpp2::PropertyType getFieldType(const folly::StringPiece name) const = 0;
 
     virtual const Field* field(int64_t index) const = 0;
     virtual const Field* field(const folly::StringPiece name) const = 0;
