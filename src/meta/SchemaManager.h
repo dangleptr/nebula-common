@@ -47,6 +47,12 @@ public:
 
     virtual StatusOr<std::vector<std::string>> getAllEdge(GraphSpaceID space) = 0;
 
+    virtual std::vector<std::pair<TagID, std::shared_ptr<const NebulaSchemaProvider>>>
+    listLatestTagSchema(GraphSpaceID space) = 0;
+
+    virtual std::vector<std::pair<EdgeType, std::shared_ptr<const NebulaSchemaProvider>>>
+    listLatestEdgeSchema(GraphSpaceID space) = 0;
+
 protected:
     SchemaManager() = default;
 };

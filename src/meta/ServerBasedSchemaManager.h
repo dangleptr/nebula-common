@@ -48,6 +48,11 @@ public:
 
     StatusOr<std::vector<std::string>> getAllEdge(GraphSpaceID space) override;
 
+    std::vector<std::pair<TagID, std::shared_ptr<const NebulaSchemaProvider>>>
+    listLatestTagSchema(GraphSpaceID space) override;
+
+    virtual std::vector<std::pair<EdgeType, std::shared_ptr<const NebulaSchemaProvider>>>
+    listLatestEdgeSchema(GraphSpaceID space) override;
     void init(MetaClient *client);
 
 private:

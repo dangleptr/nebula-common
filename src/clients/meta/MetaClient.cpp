@@ -2004,6 +2004,33 @@ StatusOr<SchemaVer> MetaClient::getLatestEdgeVersionFromCache(const GraphSpaceID
     return it->second;
 }
 
+std::vector<std::pair<TagID, SchemaVer>> MetaClient::listLatestTagVersionFromCache(const GraphSpaceID& space) {
+    if (!ready_) {
+        return {};
+    }
+    std::vector<std::pair<TagID, SchemaVer>> schemas;
+    folly::RWSpinLock::ReadHolder holder(localCacheLock_);
+    for (const auto& entry : spaceNewestTagVerMap_) {
+        if (entry.first.first == space) {
+            schemas.emplace_back(entry.first.second, entry.second);
+        }
+    }
+    return schemas;
+}
+
+std::vector<std::pair<EdgeType, SchemaVer>> MetaClient::listLatestEdgeVersionFromCache(const GraphSpaceID& space) {
+    if (!ready_) {
+        return {};
+    }
+    std::vector<std::pair<EdgeType, SchemaVer>> schemas;
+    folly::RWSpinLock::ReadHolder holder(localCacheLock_);
+    for (const auto& entry : spaceNewestEdgeVerMap_) {
+        if (entry.first.first == space) {
+            schemas.emplace_back(entry.first.second, entry.second);
+        }
+    }
+    return schemas;
+}
 
 folly::Future<StatusOr<bool>> MetaClient::heartbeat() {
     cpp2::HBReq req;
