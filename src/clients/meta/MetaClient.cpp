@@ -227,6 +227,15 @@ bool MetaClient::loadData() {
             return false;
         }
 
+        // get space properties
+        auto resp = getSpace(spaceCache->spaceName).get();
+        if (!resp.ok()) {
+            LOG(ERROR) << "Get space properties failed for space " << spaceId;
+            return false;
+        }
+        auto properties = resp.value().get_properties();
+        spaceCache->vertexIdLen_ = properties.get_vid_size();
+
         cache.emplace(spaceId, spaceCache);
         spaceIndexByName.emplace(space.second, spaceId);
     }
@@ -1628,6 +1637,23 @@ MetaClient::listEdgeIndexes(GraphSpaceID spaceID) {
                 },
                 std::move(promise));
     return future;
+}
+
+StatusOr<int32_t> MetaClient::getSpaceVidLen(const GraphSpaceID& spaceId) {
+    if (!ready_) {
+        return Status::Error("Not ready!");
+    }
+    folly::RWSpinLock::ReadHolder holder(localCacheLock_);
+    auto spaceIt = localCache_.find(spaceId);
+    if (spaceIt == localCache_.end()) {
+        LOG(ERROR) << "Space " << spaceId << " not found!";
+        return Status::Error(folly::stringPrintf("Space %d not found", spaceId));
+    }
+    auto vIdLen = spaceIt->second->vertexIdLen_;
+    if (vIdLen <= 0) {
+        return Status::Error(folly::stringPrintf("Space %d vertexId length invalid", spaceId));
+    }
+    return vIdLen;
 }
 
 StatusOr<std::shared_ptr<const NebulaSchemaProvider>>

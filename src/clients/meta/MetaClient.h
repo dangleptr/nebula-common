@@ -52,6 +52,7 @@ struct SpaceInfoCache {
     EdgeSchemas edgeSchemas_;
     Indexes tagIndexes_;
     Indexes edgeIndexes_;
+    int32_t vertexIdLen_ = -1;
 };
 
 using LocalCache = std::unordered_map<GraphSpaceID, std::shared_ptr<SpaceInfoCache>>;
@@ -400,6 +401,8 @@ public:
 
     // Opeartions for cache.
     StatusOr<GraphSpaceID> getSpaceIdByNameFromCache(const std::string& name);
+
+    StatusOr<int32_t> getSpaceVidLen(const GraphSpaceID& space);
 
     StatusOr<TagID> getTagIDByNameFromCache(const GraphSpaceID& space,
                                             const std::string& name);
