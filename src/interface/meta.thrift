@@ -221,6 +221,8 @@ struct HostItem {
         (cpp.template = "std::unordered_map") leader_parts,
     4: map<binary, list<common.PartitionID>>
         (cpp.template = "std::unordered_map") all_parts,
+    5: HostRole             role,
+    6: binary               git_info_sha
 }
 
 struct UserItem {
@@ -435,6 +437,7 @@ struct ListEdgesResp {
 }
 
 struct ListHostsReq {
+    1: HostRole role
 }
 
 struct ListHostsResp {
@@ -532,12 +535,22 @@ struct HBResp {
     4: i64              last_update_time_in_ms,
 }
 
+enum HostRole {
+    GRAPH   = 0x00,
+    META    = 0x01,
+    STORAGE = 0x02,
+    ALL     = 0x03,
+    UNKNOWN = 0x04
+} (cpp.enum_strict)
+
 struct HBReq {
     1: bool in_storaged,
     2: common.HostAddr host,
     3: ClusterID cluster_id,
     4: optional map<common.GraphSpaceID, list<common.PartitionID>>
         (cpp.template = "std::unordered_map") leader_partIds;
+    5: HostRole   role
+    6: string     git_info_sha
 }
 
 struct CreateTagIndexReq {
