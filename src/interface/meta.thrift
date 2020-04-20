@@ -260,9 +260,16 @@ enum AdminJobOp {
     RECOVER     = 0x05
 } (cpp.enum_strict)
 
+enum AdminCmd {
+    COMPACT             = 0
+    FLUSH               = 1
+    REBUILD_TAG_INDEX   = 2
+    REBUILD_EDGE_INDEX  = 3
+}
+
 struct AdminJobReq {
     1: AdminJobOp       op
-    2: common.AdminCmd  cmd
+    2: AdminCmd         cmd
     3: list<string>     paras;
 }
 
@@ -277,7 +284,7 @@ enum JobStatus {
 
 struct JobDesc {
     1: i32              id
-    2: common.AdminCmd  cmd
+    2: AdminCmd  cmd
     3: list<string>     paras
     4: JobStatus        status
     5: i64              start_time
