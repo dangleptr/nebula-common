@@ -172,4 +172,3 @@ struct KeyValue {
     1: binary key,
     2: binary value,
 } (cpp.type = "nebula::KeyValue")
-
