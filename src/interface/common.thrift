@@ -173,3 +173,9 @@ struct KeyValue {
     2: binary value,
 } (cpp.type = "nebula::KeyValue")
 
+enum AdminCmd {
+    COMPACT             = 0
+    FLUSH               = 1
+    REBUILD_TAG_INDEX   = 2
+    REBUILD_EDGE_INDEX  = 3
+}

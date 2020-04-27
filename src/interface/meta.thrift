@@ -221,6 +221,8 @@ struct HostItem {
         (cpp.template = "std::unordered_map") leader_parts,
     4: map<binary, list<common.PartitionID>>
         (cpp.template = "std::unordered_map") all_parts,
+    5: HostRole             role,
+    6: binary               git_info_sha
 }
 
 struct UserItem {
@@ -257,13 +259,13 @@ enum AdminJobOp {
     SHOW_All    = 0x02,
     SHOW        = 0x03,
     STOP        = 0x04,
-    RECOVER     = 0x05,
-    INVALID     = 0xFF,
+    RECOVER     = 0x05
 } (cpp.enum_strict)
 
 struct AdminJobReq {
-    1: AdminJobOp   op
-    2: list<string> paras;
+    1: AdminJobOp       op
+    2: common.AdminCmd  cmd
+    3: list<string>     paras;
 }
 
 enum JobStatus {
@@ -276,12 +278,12 @@ enum JobStatus {
 } (cpp.enum_strict)
 
 struct JobDesc {
-    1: i32          id
-    2: string       cmd
-    3: list<string> paras
-    4: JobStatus    status
-    5: i64          start_time
-    6: i64          stop_time
+    1: i32              id
+    2: common.AdminCmd  cmd
+    3: list<string>     paras
+    4: JobStatus        status
+    5: i64              start_time
+    6: i64              stop_time
 }
 
 struct TaskDesc {
@@ -435,6 +437,7 @@ struct ListEdgesResp {
 }
 
 struct ListHostsReq {
+    1: HostRole role
 }
 
 struct ListHostsResp {
@@ -532,12 +535,22 @@ struct HBResp {
     4: i64              last_update_time_in_ms,
 }
 
+enum HostRole {
+    GRAPH   = 0x00,
+    META    = 0x01,
+    STORAGE = 0x02,
+    ALL     = 0x03,
+    UNKNOWN = 0x04
+} (cpp.enum_strict)
+
 struct HBReq {
     1: bool in_storaged,
     2: common.HostAddr host,
     3: ClusterID cluster_id,
     4: optional map<common.GraphSpaceID, list<common.PartitionID>>
         (cpp.template = "std::unordered_map") leader_partIds;
+    5: HostRole   role
+    6: string     git_info_sha
 }
 
 struct CreateTagIndexReq {

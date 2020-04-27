@@ -73,6 +73,18 @@ bool MetaClient::isMetadReady() {
     return ready_;
 }
 
+bool MetaClient::setupLongTermHeartBeat(cpp2::HostRole role, std::string&& gitInfoSHA) {
+    if (!isMetadReady()) {
+        return false;
+    }
+    options_.role_ = role;
+    options_.gitInfoSHA_ = std::move(gitInfoSHA);
+    CHECK(bgThread_->start());
+    LOG(INFO) << "Register time task for heartbeat!";
+    size_t delayMS = FLAGS_heartbeat_interval_secs * 1000 + folly::Random::rand32(900);
+    bgThread_->addDelayTask(delayMS, &MetaClient::heartBeatThreadFunc, this);
+    return true;
+}
 
 bool MetaClient::waitForMetadReady(int count, int retryIntervalSecs) {
     if (!options_.skipConfig_) {
@@ -93,13 +105,8 @@ bool MetaClient::waitForMetadReady(int count, int retryIntervalSecs) {
         return false;
     }
 
-    CHECK(bgThread_->start());
-    LOG(INFO) << "Register time task for heartbeat!";
-    size_t delayMS = FLAGS_heartbeat_interval_secs * 1000 + folly::Random::rand32(900);
-    bgThread_->addDelayTask(delayMS, &MetaClient::heartBeatThreadFunc, this);
     return ready_;
 }
-
 
 void MetaClient::stop() {
     if (bgThread_ != nullptr) {
@@ -161,7 +168,6 @@ bool MetaClient::loadUsersAndRoles() {
     }
     return true;
 }
-
 
 bool MetaClient::loadData() {
     if (ioThreadPool_->numThreads() <= 0) {
@@ -1927,8 +1933,10 @@ StatusOr<SchemaVer> MetaClient::getLatestEdgeVersionFromCache(const GraphSpaceID
 folly::Future<StatusOr<bool>> MetaClient::heartbeat() {
     cpp2::HBReq req;
     req.set_in_storaged(options_.inStoraged_);
+    req.set_role(options_.role_);
+    req.set_host(options_.localHost_);
+    req.set_git_info_sha(options_.gitInfoSHA_);
     if (options_.inStoraged_) {
-        req.set_host(options_.localHost_);
         if (options_.clusterId_.load() == 0) {
             options_.clusterId_ =
                 FileBasedClusterIdMan::getClusterIdFromFile(FLAGS_cluster_id_path);
@@ -2581,6 +2589,9 @@ StatusOr<LeaderMap> MetaClient::loadLeader() {
     LOG(INFO) << "Load leader ok";
     return leaderMap;
 }
+
+
+
 
 }  // namespace meta
 }  // namespace nebula
